@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Interactivo - Escape Room Mágico</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Custom Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        purple: {
+                            50: '#faf5ff',
+                            100: '#f3e8ff',
+                            200: '#e9d5ff',
+                            300: '#d8b4fe',
+                            400: '#c084fc',
+                            500: '#a855f7',
+                            600: '#9333ea',
+                            700: '#7c3aed',
+                            800: '#6b21a8',
+                            900: '#581c87',
+                        },
+                        pink: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            200: '#fbcfe8',
+                            300: '#f9a8d4',
+                            400: '#f472b6',
+                            500: '#ec4899',
+                            600: '#db2777',
+                            700: '#be185d',
+                            800: '#9d174d',
+                            900: '#831843',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom animations and transitions */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+        
+        .scale-in {
+            animation: scaleIn 0.2s ease-out;
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+        
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .notification-dropdown {
+            display: none;
+        }
+        
+        .notification-dropdown.show {
+            display: block;
+        }
+        
+        .toggle-switch {
+            transition: background-color 0.3s ease;
+        }
+        
+        .toggle-switch.active {
+            background-color: #9333ea;
+        }
+        
+        .toggle-knob {
+            transition: transform 0.3s ease;
+        }
+        
+        .toggle-switch.active .toggle-knob {
+            transform: translateX(24px);
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c084fc;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a855f7;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Button effects */
+        .btn-gradient {
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, #9333ea 0%, #db2777 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(168, 85, 247, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 text-white p-6 shadow-xl">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <button onclick="goToHome()" class="flex items-center gap-4 hover:opacity-80 transition-opacity" title="Regresar a la página de inicio">
+                        <div class="relative">
+                            <div class="w-16 h-16 rounded-full border-4 border-white/30 bg-purple-700 flex items-center justify-center text-2xl font-bold">
+                                JM
+                            </div>
+                            <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                                <div class="w-2 h-2 bg-white rounded-full"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl font-bold">Jugador Mágico</h1>
+                            <p class="text-purple-100">Nivel 28 • Experto</p>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <button onclick="goToHome()" class="bg-white/20 backdrop-blur-sm border-2 border-white/40 hover:bg-white/30 px-5 py-2.5 rounded-lg transition-all duration-300 flex items-center gap-2 font-semibold hover:scale-105 shadow-lg" title="Ir a jugar - Página Principal">
+                        <i data-lucide="gamepad-2" class="w-5 h-5"></i>
+                        <span class="hidden md:inline">Ir a Jugar</span>
+                        <span class="md:hidden">🎮</span>
+                    </button>
+                    
+                    <div class="text-right">
+                        <p class="text-sm text-purple-100">Experiencia</p>
+                        <p class="text-xl font-bold">2847 XP</p>
+                    </div>
+                    
+                    <div class="relative">
+                        <button onclick="toggleNotifications()" class="relative text-white hover:bg-white/20 p-2 rounded-lg transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center">2</span>
+                        </button>
+                        
+                        <div id="notificationDropdown" class="notification-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
+                            <div class="p-4 border-b">
+                                <h3 class="font-semibold text-gray-800">Notificaciones</h3>
+                            </div>
+                            <div class="p-4 border-b hover:bg-gray-50 cursor-pointer bg-blue-50">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <p class="font-semibold text-gray-800 text-sm">Nuevo logro desbloqueado</p>
+                                        <p class="text-gray-600 text-xs mt-1">¡Has desbloqueado "Demonio de Velocidad"!</p>
+                                    </div>
+                                    <span class="text-xs text-gray-500 ml-2">Hace 5 minutos</span>
+                                </div>
+                            </div>
+                            <div class="p-4 border-b hover:bg-gray-50 cursor-pointer bg-blue-50">
+                                <div class="flex justify-between items-start">
+                                    <div class="flex-1">
+                                        <p class="font-semibold text-gray-800 text-sm">Amigo en línea</p>
+                                        <p class="text-gray-600 text-xs mt-1">Ana Martínez está jugando ahora</p>
+                                    </div>
+                                    <span class="text-xs text-gray-500 ml-2">Hace 10 minutos</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="toggleDarkMode()" class="text-white hover:bg-white/20 p-2 rounded-lg transition-colors">
+                        <i data-lucide="moon" class="w-5 h-5"></i>
+                    </button>
+                    
+                    <button onclick="switchTab('settings')" class="text-white border-white/30 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4 inline mr-2"></i>
+                        Configuración
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto p-6">
+        <!-- Botón de Acceso Directo a Jugar -->
+        <div class="mb-6 flex justify-center">
+            <button onclick="goToHome()" class="group relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 text-white px-8 py-4 rounded-xl shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-3 font-bold text-lg">
+                <div class="absolute inset-0 bg-gradient-to-r from-purple-700 via-pink-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span class="relative z-10 text-2xl">🎮</span>
+                <span class="relative z-10">¡JUGAR AHORA!</span>
+                <i data-lucide="arrow-right" class="relative z-10 w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+            </button>
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <div class="bg-white/90 backdrop-blur-sm border border-purple-200 rounded-lg p-1 mb-6">
+            <div class="grid grid-cols-7 gap-1">
+                <button onclick="switchTab('overview')" class="tab-btn active px-4 py-3 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-all" data-tab="overview">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                    Resumen
+                </button>
+                <button onclick="switchTab('profile')" class="tab-btn px-4 py-3 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-all" data-tab="profile">
+                    <i data-lucide="user" class="w-4 h-4"></i>
+                    Perfil
+                </button>
+                <button onclick="switchTab('progress')" class="tab-btn px-4 py-3 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-all" data-tab="progress">
+                    <i data-lucide="trophy" class="w-4 h-4"></i>
+                    Progreso
+                </button>
+                <button onclick="switchTab('achievements')" class="tab-btn px-4 py-3 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-all" data-tab="achievements">
+                    <i data-lucide="award" class="w-4 h-4"></i>
+                    Logros
+                </button>
+                <button onclick="switchTab('friends')" class="tab-btn px-4 py-3 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-all" data-tab="friends">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    Amigos
+                </button>
+                <button onclick="switchTab('contact')" class="tab-btn px-4 py-3 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-all" data-tab="contact">
+                    <i data-lucide="message-square" class="w-4 h-4"></i>
+                    Contacto
+                </button>
+                <button onclick="switchTab('settings')" class="tab-btn px-4 py-3 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-all" data-tab="settings">
+                    <i data-lucide="settings" class="w-4 h-4"></i>
+                    Configuración
+                </button>
+            </div>
+        </div>
+        
+        <!-- Tab Content -->
+        <div class="space-y-6">
+            
+            <!-- Overview Tab -->
+            <div id="overview-tab" class="tab-content active fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="border-2 border-purple-400 hover:shadow-lg transition-all duration-300 transform hover:scale-105 bg-white rounded-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Tiempo Total</p>
+                                <p class="text-2xl font-bold text-gray-800">13h 32m</p>
+                                <div class="flex items-center mt-1">
+                                    <i data-lucide="trending-up" class="w-4 h-4 text-green-500 mr-1"></i>
+                                    <span class="text-sm text-green-500">12%</span>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-full border-purple-400 bg-purple-100">
+                                <i data-lucide="clock" class="w-6 h-6 text-purple-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-2 border-green-400 hover:shadow-lg transition-all duration-300 transform hover:scale-105 bg-white rounded-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Puzzles Resueltos</p>
+                                <p class="text-2xl font-bold text-gray-800">89</p>
+                                <div class="flex items-center mt-1">
+                                    <i data-lucide="trending-up" class="w-4 h-4 text-green-500 mr-1"></i>
+                                    <span class="text-sm text-green-500">8%</span>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-full border-green-400 bg-green-100">
+                                <i data-lucide="target" class="w-6 h-6 text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-2 border-yellow-400 hover:shadow-lg transition-all duration-300 transform hover:scale-105 bg-white rounded-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Racha Actual</p>
+                                <p class="text-2xl font-bold text-gray-800">5 días</p>
+                                <div class="flex items-center mt-1">
+                                    <i data-lucide="trending-up" class="w-4 h-4 text-green-500 mr-1"></i>
+                                    <span class="text-sm text-green-500">25%</span>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-full border-yellow-400 bg-yellow-100">
+                                <i data-lucide="zap" class="w-6 h-6 text-yellow-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-2 border-red-400 hover:shadow-lg transition-all duration-300 transform hover:scale-105 bg-white rounded-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Mejor Tiempo</p>
+                                <p class="text-2xl font-bold text-gray-800">127s</p>
+                                <div class="flex items-center mt-1">
+                                    <i data-lucide="trending-up" class="w-4 h-4 text-red-500 mr-1 transform rotate-180"></i>
+                                    <span class="text-sm text-red-500">5%</span>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-full border-red-400 bg-red-100">
+                                <i data-lucide="trophy" class="w-6 h-6 text-red-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="border-purple-200 shadow-lg bg-white rounded-lg">
+                        <div class="p-6 border-b">
+                            <h3 class="flex items-center gap-2 font-semibold text-gray-800">
+                                <i data-lucide="activity" class="w-5 h-5 text-purple-600"></i>
+                                Actividad Reciente
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl">🚀</span>
+                                    <div>
+                                        <p class="font-semibold text-gray-800">Exploración Espacial</p>
+                                        <p class="text-sm text-gray-500">Hace 2 horas</p>
+                                    </div>
+                                </div>
+                                <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Completado</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl">⏰</span>
+                                    <div>
+                                        <p class="font-semibold text-gray-800">Viaje en el Tiempo</p>
+                                        <p class="text-sm text-gray-500">Ayer</p>
+                                    </div>
+                                </div>
+                                <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm">Abandonado</span>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div class="flex items-center gap-3">
+                                    <span class="text-2xl">🏆</span>
+                                    <div>
+                                        <p class="font-semibold text-gray-800">Desafío Deportivo</p>
+                                        <p class="text-sm text-gray-500">Hace 2 días</p>
+                                    </div>
+                                </div>
+                                <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm">Completado</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-pink-200 shadow-lg bg-white rounded-lg">
+                        <div class="p-6 border-b">
+                            <h3 class="flex items-center gap-2 font-semibold text-gray-800">
+                                <i data-lucide="trending-up" class="w-5 h-5 text-pink-600"></i>
+                                Progreso General
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-purple-600">75%</div>
+                                <p class="text-sm text-gray-600">Progreso Total</p>
+                                <div class="w-full bg-gray-200 rounded-full h-3 mt-2">
+                                    <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full progress-bar" style="width: 75%"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span>🎭</span>
+                                        <span class="text-sm font-medium">Clásico</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-20 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-purple-500 h-2 rounded-full" style="width: 100%"></div>
+                                        </div>
+                                        <span class="text-sm text-gray-600">100%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span>🌿</span>
+                                        <span class="text-sm font-medium">Naturaleza</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-20 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-green-500 h-2 rounded-full" style="width: 87%"></div>
+                                        </div>
+                                        <span class="text-sm text-gray-600">87%</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span>🚀</span>
+                                        <span class="text-sm font-medium">Espacio</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-20 bg-gray-200 rounded-full h-2">
+                                            <div class="bg-blue-500 h-2 rounded-full" style="width: 75%"></div>
+                                        </div>
+                                        <span class="text-sm text-gray-600">75%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile Tab -->
+            <div id="profile-tab" class="tab-content">
+                <div class="space-y-6">
+                    <!-- Información Personal -->
+                    <div class="border-purple-200 shadow-lg bg-white rounded-lg">
+                        <div class="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6 rounded-t-lg">
+                            <div class="flex justify-between items-center">
+                                <h3 class="flex items-center gap-2 text-lg font-semibold">
+                                    <i data-lucide="user" class="w-5 h-5"></i>
+                                    Información Personal
+                                </h3>
+                                <button onclick="toggleEditMode()" class="text-white border-white/30 hover:bg-white/20 px-3 py-1 rounded text-sm transition-colors">
+                                    <i data-lucide="edit" class="w-4 h-4 inline" id="editIcon"></i>
+                                    <i data-lucide="x" class="w-4 h-4 inline hidden" id="cancelIcon"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-4">
+                                        <div class="relative">
+                                            <div class="w-24 h-24 rounded-full bg-purple-100 flex items-center justify-center text-3xl font-bold text-purple-600" id="avatarDisplay">
+                                                JM
+                                            </div>
+                                            <button onclick="changeAvatar()" class="absolute bottom-0 right-0 w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors" title="Cambiar avatar">
+                                                <i data-lucide="camera" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                        <div>
+                                            <input type="text" id="nameInput" value="Jugador Mágico" disabled class="text-xl font-bold text-gray-800 bg-transparent border-none px-0 py-0 focus:bg-gray-50 focus:border focus:border-purple-300 focus:rounded px-2 py-1" />
+                                            <p class="text-gray-600">Miembro desde 15 de enero de 2024</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Biografía</label>
+                                        <textarea id="bioInput" disabled rows="3" placeholder="Cuéntanos sobre ti..." class="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg resize-none">Apasionado por los puzzles y los desafíos mentales. Siempre buscando nuevos retos para mejorar mis habilidades.</textarea>
+                                    </div>
+                                    
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                            <input type="email" id="emailInput" value="jugador@escaperoom.com" disabled class="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                                            <input type="tel" id="phoneInput" value="+34 600 123 456" disabled class="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento</label>
+                                            <input type="date" id="birthInput" value="1990-05-15" disabled class="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg" />
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="space-y-4">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="text-center p-4 bg-purple-50 rounded-lg">
+                                            <p class="text-2xl font-bold text-purple-600">156</p>
+                                            <p class="text-sm text-gray-600">Partidas Jugadas</p>
+                                        </div>
+                                        <div class="text-center p-4 bg-pink-50 rounded-lg">
+                                            <p class="text-2xl font-bold text-pink-600">2847</p>
+                                            <p class="text-sm text-gray-600">Puntos XP</p>
+                                        </div>
+                                        <div class="text-center p-4 bg-blue-50 rounded-lg">
+                                            <p class="text-2xl font-bold text-blue-600">89</p>
+                                            <p class="text-sm text-gray-600">Puzzles Resueltos</p>
+                                        </div>
+                                        <div class="text-center p-4 bg-green-50 rounded-lg">
+                                            <p class="text-2xl font-bold text-green-600">28</p>
+                                            <p class="text-sm text-gray-600">Nivel Actual</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="space-y-3">
+                                        <h4 class="font-semibold text-gray-800">Preferencias de Juego</h4>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Categoría Favorita</label>
+                                            <select id="favoriteCategory" disabled class="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg">
+                                                <option value="clasico">Clásico</option>
+                                                <option value="naturaleza" selected>Naturaleza</option>
+                                                <option value="espacio">Exploración Espacial</option>
+                                                <option value="tiempo">Viaje en el Tiempo</option>
+                                                <option value="deporte">Desafío Deportivo</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Dificultad Preferida</label>
+                                            <select id="preferredDifficulty" disabled class="w-full px-3 py-2 border border-gray-200 bg-gray-50 rounded-lg">
+                                                <option value="facil">Fácil</option>
+                                                <option value="medio" selected>Medio</option>
+                                                <option value="dificil">Difícil</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="space-y-3">
+                                        <h4 class="font-semibold text-gray-800">Configuración de Privacidad</h4>
+                                        <div class="space-y-2">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-sm text-gray-700">Perfil Público</span>
+                                                <button onclick="togglePrivacy(this)" class="toggle-switch active w-12 h-6 rounded-full bg-gray-300 relative">
+                                                    <div class="toggle-knob w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-0.5"></div>
+                                                </button>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-sm text-gray-700">Mostrar Progreso</span>
+                                                <button onclick="togglePrivacy(this)" class="toggle-switch active w-12 h-6 rounded-full bg-gray-300 relative">
+                                                    <div class="toggle-knob w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-0.5"></div>
+                                                </button>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-sm text-gray-700">Mostrar Logros</span>
+                                                <button onclick="togglePrivacy(this)" class="toggle-switch active w-12 h-6 rounded-full bg-gray-300 relative">
+                                                    <div class="toggle-knob w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-0.5"></div>
+                                                </button>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-sm text-gray-700">Permitir Solicitudes</span>
+                                                <button onclick="togglePrivacy(this)" class="toggle-switch active w-12 h-6 rounded-full bg-gray-300 relative">
+                                                    <div class="toggle-knob w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-0.5"></div>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="saveButtons" class="mt-6 flex justify-end gap-2 hidden">
+                                <button onclick="cancelEdit()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                    Cancelar
+                                </button>
+                                <button onclick="saveProfile()" class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg transition-colors">
+                                    <i data-lucide="save" class="w-4 h-4 inline mr-2"></i>
+                                    Guardar Cambios
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Actividad Reciente -->
+                    <div class="border-purple-200 shadow-lg bg-white rounded-lg">
+                        <div class="p-6 border-b">
+                            <h3 class="flex items-center gap-2 font-semibold text-gray-800">
+                                <i data-lucide="activity" class="w-5 h-5 text-purple-600"></i>
+                                Actividad Reciente en tu Perfil
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-3">
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                                    <i data-lucide="trophy" class="w-5 h-5 text-purple-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-800 text-sm">Nuevo logro desbloqueado</p>
+                                    <p class="text-xs text-gray-500">Hace 2 horas</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                                    <i data-lucide="check-circle" class="w-5 h-5 text-green-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-800 text-sm">Completaste la categoría "Clásico"</p>
+                                    <p class="text-xs text-gray-500">Ayer</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                                    <i data-lucide="trending-up" class="w-5 h-5 text-blue-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-800 text-sm">Subiste al nivel 28</p>
+                                    <p class="text-xs text-gray-500">Hace 3 días</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Progress Tab -->
+            <div id="progress-tab" class="tab-content">
+                <div class="space-y-6">
+                    <!-- Estadísticas Generales -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="bg-white border-2 border-purple-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-gray-600">Progreso Total</span>
+                                <i data-lucide="trending-up" class="w-4 h-4 text-green-500"></i>
+                            </div>
+                            <p class="text-2xl font-bold text-purple-600">75%</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+                                <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div class="bg-white border-2 border-blue-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-gray-600">Puzzles Completados</span>
+                                <i data-lucide="target" class="w-4 h-4 text-blue-500"></i>
+                            </div>
+                            <p class="text-2xl font-bold text-blue-600">89/120</p>
+                            <p class="text-xs text-gray-500 mt-1">74% completado</p>
+                        </div>
+                        <div class="bg-white border-2 border-green-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-gray-600">Mejor Racha</span>
+                                <i data-lucide="flame" class="w-5 h-4 text-green-500"></i>
+                            </div>
+                            <p class="text-2xl font-bold text-green-600">12 días</p>
+                            <p class="text-xs text-gray-500 mt-1">Racha actual: 5 días</p>
+                        </div>
+                        <div class="bg-white border-2 border-yellow-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm text-gray-600">Mejor Tiempo</span>
+                                <i data-lucide="clock" class="w-4 h-4 text-yellow-500"></i>
+                            </div>
+                            <p class="text-2xl font-bold text-yellow-600">1m 27s</p>
+                            <p class="text-xs text-gray-500 mt-1">Promedio: 3m 45s</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráfico de Progreso Semanal -->
+                    <div class="bg-white border-purple-200 shadow-lg rounded-lg p-6">
+                        <h3 class="flex items-center gap-2 font-semibold text-gray-800 mb-4">
+                            <i data-lucide="bar-chart-2" class="w-5 h-5 text-purple-600"></i>
+                            Progreso Semanal
+                        </h3>
+                        <div class="grid grid-cols-7 gap-2">
+                            <div class="text-center">
+                                <div class="h-32 bg-gray-100 rounded-t-lg relative">
+                                    <div class="absolute bottom-0 w-full bg-purple-500 rounded-t-lg" style="height: 65%"></div>
+                                </div>
+                                <p class="text-xs text-gray-600 mt-2">Lun</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="h-32 bg-gray-100 rounded-t-lg relative">
+                                    <div class="absolute bottom-0 w-full bg-purple-500 rounded-t-lg" style="height: 80%"></div>
+                                </div>
+                                <p class="text-xs text-gray-600 mt-2">Mar</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="h-32 bg-gray-100 rounded-t-lg relative">
+                                    <div class="absolute bottom-0 w-full bg-purple-500 rounded-t-lg" style="height: 45%"></div>
+                                </div>
+                                <p class="text-xs text-gray-600 mt-2">Mié</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="h-32 bg-gray-100 rounded-t-lg relative">
+                                    <div class="absolute bottom-0 w-full bg-purple-500 rounded-t-lg" style="height: 90%"></div>
+                                </div>
+                                <p class="text-xs text-gray-600 mt-2">Jue</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="h-32 bg-gray-100 rounded-t-lg relative">
+                                    <div class="absolute bottom-0 w-full bg-purple-500 rounded-t-lg" style="height: 70%"></div>
+                                </div>
+                                <p class="text-xs text-gray-600 mt-2">Vie</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="h-32 bg-gray-100 rounded-t-lg relative">
+                                    <div class="absolute bottom-0 w-full bg-purple-500 rounded-t-lg" style="height: 95%"></div>
+                                </div>
+                                <p class="text-xs text-gray-600 mt-2">Sáb</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="h-32 bg-gray-100 rounded-t-lg relative">
+                                    <div class="absolute bottom-0 w-full bg-purple-500 rounded-t-lg" style="height: 55%"></div>
+                                </div>
+                                <p class="text-xs text-gray-600 mt-2">Dom</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Búsqueda y Filtros -->
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800">Progreso por Categorías</h2>
+                        <div class="flex gap-2">
+                            <div class="relative">
+                                <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                                <input type="text" placeholder="Buscar categorías..." onkeyup="filterCategories(this.value)" class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                            </div>
+                            <button onclick="showFilterModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                <i data-lucide="filter" class="w-4 h-4 inline mr-2"></i>
+                                Filtrar
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Categorías -->
+                    <div id="categoriesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Categories will be populated by JavaScript -->
+                    </div>
+                    
+                    <!-- Estadísticas de Rendimiento -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white border-purple-200 shadow-lg rounded-lg p-6">
+                            <h3 class="flex items-center gap-2 font-semibold text-gray-800 mb-4">
+                                <i data-lucide="target" class="w-5 h-5 text-purple-600"></i>
+                                Precisión por Dificultad
+                            </h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-600">Fácil</span>
+                                        <span class="font-semibold">95%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-green-500 h-3 rounded-full" style="width: 95%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">45/47 puzzles completados</p>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-600">Medio</span>
+                                        <span class="font-semibold">82%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-yellow-500 h-3 rounded-full" style="width: 82%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">32/39 puzzles completados</p>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="text-gray-600">Difícil</span>
+                                        <span class="font-semibold">65%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-3">
+                                        <div class="bg-red-500 h-3 rounded-full" style="width: 65%"></div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">12/34 puzzles completados</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white border-pink-200 shadow-lg rounded-lg p-6">
+                            <h3 class="flex items-center gap-2 font-semibold text-gray-800 mb-4">
+                                <i data-lucide="trending-up" class="w-5 h-5 text-pink-600"></i>
+                                Mejora de Rendimiento
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-semibold text-gray-800 text-sm">Tiempo Promedio</p>
+                                        <p class="text-xs text-gray-500">Esta semana vs semana pasada</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-green-600 text-lg">-15%</p>
+                                        <p class="text-xs text-gray-500">3m 20s → 2m 45s</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-semibold text-gray-800 text-sm">Puzzles Completados</p>
+                                        <p class="text-xs text-gray-500">Esta semana vs semana pasada</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-green-600 text-lg">+12%</p>
+                                        <p class="text-xs text-gray-500">18 → 20 puzzles</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <p class="font-semibold text-gray-800 text-sm">Tasa de Éxito</p>
+                                        <p class="text-xs text-gray-500">Esta semana vs semana pasada</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-bold text-green-600 text-lg">+8%</p>
+                                        <p class="text-xs text-gray-500">85% → 92%</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Achievements Tab -->
+            <div id="achievements-tab" class="tab-content">
+                <div id="achievementsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Achievements will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Friends Tab -->
+            <div id="friends-tab" class="tab-content">
+                <div class="space-y-6">
+                    <!-- Búsqueda y Solicitudes -->
+                    <div class="bg-white border-purple-200 shadow-lg rounded-lg p-6">
+                        <div class="flex flex-col md:flex-row gap-4 mb-4">
+                            <div class="flex-1 relative">
+                                <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4"></i>
+                                <input type="text" id="friendSearchInput" placeholder="Buscar amigos por nombre..." onkeyup="searchFriends(this.value)" class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                            </div>
+                            <button onclick="switchFriendsView('pending')" class="px-4 py-2 border border-purple-500 text-purple-600 rounded-lg hover:bg-purple-50 transition-colors relative">
+                                <i data-lucide="user-plus" class="w-4 h-4 inline mr-2"></i>
+                                Solicitudes
+                                <span id="pendingCount" class="ml-2 bg-purple-600 text-white text-xs px-2 py-0.5 rounded-full">2</span>
+                            </button>
+                            <button onclick="switchFriendsView('all')" class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-colors">
+                                <i data-lucide="users" class="w-4 h-4 inline mr-2"></i>
+                                Todos los Amigos
+                            </button>
+                        </div>
+                        
+                        <!-- Vista de Solicitudes Pendientes -->
+                        <div id="pendingRequestsView" class="hidden space-y-3">
+                            <h3 class="font-semibold text-gray-800 mb-3">Solicitudes Pendientes</h3>
+                            <div class="border-2 border-purple-200 rounded-lg p-4 mb-3">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
+                                            MR
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-800">María Rodríguez</p>
+                                            <p class="text-xs text-gray-500">Nivel 15 • 67% progreso</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button onclick="acceptFriendRequest('friend_004')" class="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm">
+                                            <i data-lucide="check" class="w-4 h-4 inline mr-1"></i>
+                                            Aceptar
+                                        </button>
+                                        <button onclick="rejectFriendRequest('friend_004')" class="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm">
+                                            <i data-lucide="x" class="w-4 h-4 inline mr-1"></i>
+                                            Rechazar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="border-2 border-purple-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-semibold">
+                                            DL
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-800">David López</p>
+                                            <p class="text-xs text-gray-500">Nivel 20 • 78% progreso</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button onclick="acceptFriendRequest('friend_005')" class="px-3 py-1 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm">
+                                            <i data-lucide="check" class="w-4 h-4 inline mr-1"></i>
+                                            Aceptar
+                                        </button>
+                                        <button onclick="rejectFriendRequest('friend_005')" class="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm">
+                                            <i data-lucide="x" class="w-4 h-4 inline mr-1"></i>
+                                            Rechazar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Vista de Todos los Amigos -->
+                        <div id="allFriendsView">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="font-semibold text-gray-800">Mis Amigos (<span id="friendsCount">3</span>)</h3>
+                                <select id="friendsFilter" onchange="filterFriends(this.value)" class="px-3 py-1 border border-gray-300 rounded-lg text-sm">
+                                    <option value="all">Todos</option>
+                                    <option value="online">En línea</option>
+                                    <option value="playing">Jugando</option>
+                                    <option value="offline">Desconectados</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Grid de Amigos -->
+                    <div id="friendsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Friends will be populated by JavaScript -->
+                    </div>
+                    
+                    <!-- Comparación con Amigos -->
+                    <div class="bg-white border-purple-200 shadow-lg rounded-lg p-6">
+                        <h3 class="flex items-center gap-2 font-semibold text-gray-800 mb-4">
+                            <i data-lucide="bar-chart-3" class="w-5 h-5 text-purple-600"></i>
+                            Comparar Progreso con Amigos
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold">
+                                            JM
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-800 text-sm">Tú</p>
+                                            <p class="text-xs text-gray-500">Nivel 28</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-sm font-bold text-purple-600">75%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="bg-purple-500 h-3 rounded-full" style="width: 75%"></div>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-blue-50 rounded-lg">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
+                                            CR
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-800 text-sm">Carlos Ruiz</p>
+                                            <p class="text-xs text-gray-500">Nivel 22 • En línea</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-sm font-bold text-blue-600">84%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="bg-blue-500 h-3 rounded-full" style="width: 84%"></div>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold">
+                                            AM
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-800 text-sm">Ana Martínez</p>
+                                            <p class="text-xs text-gray-500">Nivel 15 • Jugando</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-sm font-bold text-gray-600">67%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="bg-green-500 h-3 rounded-full" style="width: 67%"></div>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-semibold">
+                                            LS
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-800 text-sm">Laura Sánchez</p>
+                                            <p class="text-xs text-gray-500">Nivel 18 • Desconectada</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-sm font-bold text-gray-600">45%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-3">
+                                    <div class="bg-yellow-500 h-3 rounded-full" style="width: 45%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Settings Tab -->
+            <div id="settings-tab" class="tab-content">
+                <div class="space-y-6">
+                    <!-- Configuración General -->
+                    <div class="bg-white border-purple-200 shadow-lg rounded-lg p-6">
+                        <h3 class="flex items-center gap-2 font-semibold text-gray-800 mb-6">
+                            <i data-lucide="settings" class="w-5 h-5 text-purple-600"></i>
+                            Configuración General
+                        </h3>
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Idioma</label>
+                                <select id="languageSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="es" selected>Español</option>
+                                    <option value="en">English</option>
+                                    <option value="fr">Français</option>
+                                    <option value="de">Deutsch</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Zona Horaria</label>
+                                <select id="timezoneSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="Europe/Madrid" selected>Madrid (GMT+1)</option>
+                                    <option value="America/New_York">New York (GMT-5)</option>
+                                    <option value="America/Mexico_City">México (GMT-6)</option>
+                                    <option value="America/Buenos_Aires">Buenos Aires (GMT-3)</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-700">Modo Oscuro</p>
+                                    <p class="text-sm text-gray-500">Activa el tema oscuro para reducir la fatiga visual</p>
+                                </div>
+                                <button onclick="toggleDarkModeSetting(this)" class="toggle-switch w-12 h-6 rounded-full bg-gray-300 relative">
+                                    <div class="toggle-knob w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-0.5"></div>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-700">Animaciones</p>
+                                    <p class="text-sm text-gray-500">Habilita animaciones en la interfaz</p>
+                                </div>
+                                <button onclick="toggleSetting(this)" class="toggle-switch active w-12 h-6 rounded-full bg-gray-300 relative">
+                                    <div class="toggle-knob w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-0.5"></div>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-700">Efectos de Sonido</p>
+                                    <p class="text-sm text-gray-500">Activa sonidos para acciones y notificaciones</p>
+                                </div>
+                                <button onclick="toggleSetting(this)" class="toggle-switch active w-12 h-6 rounded-full bg-gray-300 relative">
+                                    <div class="toggle-knob w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-0.5"></div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notificaciones -->
+                    <div class="bg-white border-purple-200 shadow-lg rounded-lg p-6">
+                        <h3 class="flex items-center gap-2 font-semibold text-gray-800 mb-6">
+                            <i data-lucide="bell" class="w-5 h-5 text-purple-600"></i>
+                            Notificaciones
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-700">Notificaciones por Email</p>
+                                    <p class="text-sm text-gray-500">Recibe notificaciones importantes por correo</p>
+                                </div>
+                                <button onclick="toggleSetting(this)" class="toggle-switch active w-12 h-6 rounded-full bg-gray-300 relative">
+                                    <div class="toggle-knob w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-0.5"></div>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-700">Logros Desbloqueados</p>
+                                    <p class="text-sm text-gray-500">Notifica cuando desbloquees un logro</p>
+                                </div>
+                                <button onclick="toggleSetting(this)" class="toggle-switch active w-12 h-6 rounded-full bg-gray-300 relative">
+                                    <div class="toggle-knob w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-0.5"></div>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-700">Solicitudes de Amistad</p>
+                                    <p class="text-sm text-gray-500">Notifica cuando recibas solicitudes de amistad</p>
+                                </div>
+                                <button onclick="toggleSetting(this)" class="toggle-switch active w-12 h-6 rounded-full bg-gray-300 relative">
+                                    <div class="toggle-knob w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-0.5"></div>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-700">Amigos en Línea</p>
+                                    <p class="text-sm text-gray-500">Notifica cuando tus amigos inicien sesión</p>
+                                </div>
+                                <button onclick="toggleSetting(this)" class="toggle-switch w-12 h-6 rounded-full bg-gray-300 relative">
+                                    <div class="toggle-knob w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-0.5"></div>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-700">Recordatorios Diarios</p>
+                                    <p class="text-sm text-gray-500">Recibe recordatorios para mantener tu racha</p>
+                                </div>
+                                <button onclick="toggleSetting(this)" class="toggle-switch active w-12 h-6 rounded-full bg-gray-300 relative">
+                                    <div class="toggle-knob w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-0.5"></div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Preferencias de Juego -->
+                    <div class="bg-white border-purple-200 shadow-lg rounded-lg p-6">
+                        <h3 class="flex items-center gap-2 font-semibold text-gray-800 mb-6">
+                            <i data-lucide="gamepad-2" class="w-5 h-5 text-purple-600"></i>
+                            Preferencias de Juego
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Dificultad por Defecto</label>
+                                <select id="defaultDifficulty" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="auto">Automática (según nivel)</option>
+                                    <option value="easy">Fácil</option>
+                                    <option value="medium" selected>Medio</option>
+                                    <option value="hard">Difícil</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tiempo de Puzzle (segundos)</label>
+                                <input type="number" id="puzzleTime" value="300" min="60" max="600" step="30" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                                <p class="text-xs text-gray-500 mt-1">Tiempo límite por defecto para cada puzzle</p>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-700">Mostrar Pistas Automáticamente</p>
+                                    <p class="text-sm text-gray-500">Muestra pistas después de cierto tiempo</p>
+                                </div>
+                                <button onclick="toggleSetting(this)" class="toggle-switch w-12 h-6 rounded-full bg-gray-300 relative">
+                                    <div class="toggle-knob w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-0.5"></div>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-700">Confirmar antes de salir</p>
+                                    <p class="text-sm text-gray-500">Pregunta antes de abandonar un puzzle</p>
+                                </div>
+                                <button onclick="toggleSetting(this)" class="toggle-switch active w-12 h-6 rounded-full bg-gray-300 relative">
+                                    <div class="toggle-knob w-5 h-5 bg-white rounded-full shadow-md absolute top-0.5 left-0.5"></div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Privacidad y Seguridad -->
+                    <div class="bg-white border-purple-200 shadow-lg rounded-lg p-6">
+                        <h3 class="flex items-center gap-2 font-semibold text-gray-800 mb-6">
+                            <i data-lucide="shield" class="w-5 h-5 text-purple-600"></i>
+                            Privacidad y Seguridad
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Cambiar Contraseña</label>
+                                <div class="space-y-2">
+                                    <input type="password" id="currentPassword" placeholder="Contraseña actual" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                                    <input type="password" id="newPassword" placeholder="Nueva contraseña" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                                    <input type="password" id="confirmPassword" placeholder="Confirmar nueva contraseña" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                                </div>
+                                <button onclick="changePassword()" class="mt-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm">
+                                    Cambiar Contraseña
+                                </button>
+                            </div>
+                            <div class="border-t pt-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div>
+                                        <p class="font-medium text-gray-700">Sesiones Activas</p>
+                                        <p class="text-sm text-gray-500">Administra tus sesiones iniciadas</p>
+                                    </div>
+                                    <button onclick="showActiveSessions()" class="px-3 py-1 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        Ver Sesiones
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-700">Cerrar Sesión en Todos los Dispositivos</p>
+                                    <p class="text-sm text-gray-500">Cierra sesión en todos los dispositivos excepto este</p>
+                                </div>
+                                <button onclick="logoutAllDevices()" class="px-3 py-1 text-sm bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors">
+                                    Cerrar Todas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cuenta -->
+                    <div class="bg-white border-red-200 shadow-lg rounded-lg p-6">
+                        <h3 class="flex items-center gap-2 font-semibold text-red-600 mb-4">
+                            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                            Zona de Peligro
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-200">
+                                <div>
+                                    <p class="font-medium text-red-700">Eliminar Cuenta</p>
+                                    <p class="text-sm text-red-600">Elimina permanentemente tu cuenta y todos tus datos</p>
+                                </div>
+                                <button onclick="confirmDeleteAccount()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
+                                    Eliminar Cuenta
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                                <div>
+                                    <p class="font-medium text-yellow-700">Exportar Datos</p>
+                                    <p class="text-sm text-yellow-600">Descarga una copia de todos tus datos</p>
+                                </div>
+                                <button onclick="exportData()" class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm">
+                                    <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+                                    Exportar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botones de Guardar -->
+                    <div class="flex justify-end gap-3">
+                        <button onclick="resetSettings()" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            Restablecer
+                        </button>
+                        <button onclick="saveSettings()" class="px-6 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-lg transition-colors">
+                            <i data-lucide="save" class="w-4 h-4 inline mr-2"></i>
+                            Guardar Configuración
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Tab -->
+            <div id="contact-tab" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="border-purple-200 shadow-lg bg-white rounded-lg">
+                        <div class="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-6 rounded-t-lg">
+                            <h3 class="flex items-center gap-2 text-lg font-semibold">
+                                <i data-lucide="mail" class="w-5 h-5"></i>
+                                Contacto del Equipo
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                                <i data-lucide="mail" class="w-5 h-5 text-purple-600"></i>
+                                <div>
+                                    <p class="font-semibold text-gray-800">Email</p>
+                                    <p class="text-sm text-gray-600">contacto@escaperoommagico.com</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-pink-50 rounded-lg">
+                                <i data-lucide="phone" class="w-5 h-5 text-pink-600"></i>
+                                <div>
+                                    <p class="font-semibold text-gray-800">Teléfono</p>
+                                    <p class="text-sm text-gray-600">+34 900 123 456</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                                <i data-lucide="map-pin" class="w-5 h-5 text-blue-600"></i>
+                                <div>
+                                    <p class="font-semibold text-gray-800">Dirección</p>
+                                    <p class="text-sm text-gray-600">Calle Magia 123, 28080 Madrid, España</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                                <i data-lucide="globe" class="w-5 h-5 text-green-600"></i>
+                                <div>
+                                    <p class="font-semibold text-gray-800">Web</p>
+                                    <p class="text-sm text-gray-600">www.escaperoommagico.com</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2 p-6 pt-0 border-t">
+                            <button class="flex-1 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                                <i data-lucide="github" class="w-4 h-4 inline mr-2"></i>
+                                GitHub
+                            </button>
+                            <button class="flex-1 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                                <i data-lucide="twitter" class="w-4 h-4 inline mr-2"></i>
+                                Twitter
+                            </button>
+                            <button class="flex-1 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+                                <i data-lucide="message-square" class="w-4 h-4 inline mr-2"></i>
+                                Discord
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="border-pink-200 shadow-lg bg-white rounded-lg">
+                        <div class="bg-gradient-to-r from-pink-500 to-purple-500 text-white p-6 rounded-t-lg">
+                            <h3 class="flex items-center gap-2 text-lg font-semibold">
+                                <i data-lucide="zap" class="w-5 h-5"></i>
+                                Envíanos un Mensaje
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <form onsubmit="sendMessage(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Asunto</label>
+                                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="¿Sobre qué quieres contactarnos?" />
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Mensaje</label>
+                                    <textarea rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Cuéntanos tus ideas, reporta un error o simplemente saluda..."></textarea>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="submit" class="flex-1 btn-gradient text-white px-4 py-2 rounded-lg">
+                                        <i data-lucide="mail" class="w-4 h-4 inline mr-2"></i>
+                                        Enviar Mensaje
+                                    </button>
+                                    <button type="button" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <i data-lucide="share-2" class="w-4 h-4 inline mr-2"></i>
+                                        Compartir
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 scale-in">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="check" class="w-8 h-8 text-green-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">¡Éxito!</h3>
+                <p class="text-gray-600 mb-4" id="modalMessage">Tu perfil ha sido actualizado correctamente</p>
+                <button onclick="closeModal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Data
+        const categories = [
+            { id: 'clasico', name: 'Clásico', icon: '🎭', color: '#8B5CF6', progress: 100, totalPuzzles: 16, completedPuzzles: 16, bestTime: 245, difficulty: 'difícil', locked: false },
+            { id: 'naturaleza', name: 'Naturaleza', icon: '🌿', color: '#10B981', progress: 87, totalPuzzles: 16, completedPuzzles: 14, bestTime: 189, difficulty: 'medio', locked: false },
+            { id: 'espacio', name: 'Exploración Espacial', icon: '🚀', color: '#3B82F6', progress: 75, totalPuzzles: 16, completedPuzzles: 12, bestTime: 156, difficulty: 'medio', locked: false },
+            { id: 'tiempo', name: 'Viaje en el Tiempo', icon: '⏰', color: '#F59E0B', progress: 62, totalPuzzles: 16, completedPuzzles: 10, bestTime: 198, difficulty: 'medio', locked: false },
+            { id: 'deporte', name: 'Desafío Deportivo', icon: '🏆', color: '#EF4444', progress: 50, totalPuzzles: 16, completedPuzzles: 8, bestTime: 167, difficulty: 'fácil', locked: false }
+        ];
+        
+        const achievements = [
+            { id: 'first_puzzle', name: 'Primer Paso', description: 'Resuelve tu primer puzzle', icon: '🎯', unlocked: true, progress: 1, maxProgress: 1 },
+            { id: 'speed_demon', name: 'Demonio de Velocidad', description: 'Resuelve 10 puzzles en menos de 5 minutos', icon: '⚡', unlocked: true, progress: 12, maxProgress: 10 },
+            { id: 'perfectionist', name: 'Perfeccionista', description: 'Completa 5 categorías sin usar pistas', icon: '💎', unlocked: false, progress: 3, maxProgress: 5 },
+            { id: 'explorer', name: 'Explorador', description: 'Juega todas las categorías', icon: '🗺️', unlocked: true, progress: 10, maxProgress: 10 }
+        ];
+        
+        const friends = [
+            { id: 'friend_001', name: 'Ana Martínez', status: 'online', lastSeen: 'Ahora', level: 15, progress: 67 },
+            { id: 'friend_002', name: 'Carlos Ruiz', status: 'playing', lastSeen: 'Hace 5 min', level: 22, progress: 84 },
+            { id: 'friend_003', name: 'Laura Sánchez', status: 'offline', lastSeen: 'Hace 2 horas', level: 18, progress: 45 }
+        ];
+        
+        let selectedCategory = null;
+        let isEditMode = false;
+        let darkMode = false;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            renderCategories();
+            renderAchievements();
+            renderFriends();
+            updateTabStyles();
+        });
+        
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Update button styles
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-purple-600', 'text-white');
+                btn.classList.add('text-gray-600', 'hover:text-gray-800');
+            });
+            
+            const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
+            activeBtn.classList.remove('text-gray-600', 'hover:text-gray-800');
+            activeBtn.classList.add('bg-purple-600', 'text-white');
+        }
+        
+        // Update tab styles
+        function updateTabStyles() {
+            const activeBtn = document.querySelector('.tab-btn.active');
+            if (activeBtn) {
+                activeBtn.classList.add('bg-purple-600', 'text-white');
+            }
+            
+            document.querySelectorAll('.tab-btn:not(.active)').forEach(btn => {
+                btn.classList.add('text-gray-600', 'hover:text-gray-800');
+            });
+        }
+        
+        // Notifications
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.classList.toggle('show');
+        }
+        
+        // Dark mode
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('dark');
+            // Here you would add dark mode styles
+        }
+        
+        // Edit mode - enhanced version will be used
+        
+        function cancelEdit() {
+            toggleEditMode();
+            // Reset values
+            const emailInput = document.getElementById('emailInput');
+            const phoneInput = document.getElementById('phoneInput');
+            const nameInput = document.getElementById('nameInput');
+            const bioInput = document.getElementById('bioInput');
+            const birthInput = document.getElementById('birthInput');
+            
+            if (emailInput) emailInput.value = 'jugador@escaperoom.com';
+            if (phoneInput) phoneInput.value = '+34 600 123 456';
+            if (nameInput) nameInput.value = 'Jugador Mágico';
+            if (bioInput) bioInput.value = 'Apasionado por los puzzles y los desafíos mentales. Siempre buscando nuevos retos para mejorar mis habilidades.';
+            if (birthInput) birthInput.value = '1990-05-15';
+        }
+        
+        function saveProfile() {
+            // Simulate saving
+            toggleEditMode();
+            showModal('Tu perfil ha sido actualizado correctamente');
+        }
+        
+        // Privacy toggles
+        function togglePrivacy(button) {
+            button.classList.toggle('active');
+        }
+        
+        // Categories
+        function renderCategories() {
+            const grid = document.getElementById('categoriesGrid');
+            grid.innerHTML = categories.map(category => `
+                <div class="border-2 border-gray-200 hover:border-purple-300 transition-all duration-300 cursor-pointer card-hover bg-white rounded-lg p-6" onclick="selectCategory('${category.id}')">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-3xl">${category.icon}</span>
+                            <div>
+                                <h3 class="font-bold text-gray-800">${category.name}</h3>
+                                <p class="text-sm text-gray-500 capitalize">${category.difficulty}</p>
+                            </div>
+                        </div>
+                        ${category.locked ? 
+                            '<i data-lucide="lock" class="w-5 h-5 text-gray-400"></i>' : 
+                            '<i data-lucide="unlock" class="w-5 h-5 text-green-500"></i>'
+                        }
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-600">Progreso</span>
+                                <span class="font-semibold">${category.progress}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full progress-bar" style="width: ${category.progress}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <p class="text-gray-500">Completados</p>
+                                <p class="font-semibold">${category.completedPuzzles}/${category.totalPuzzles}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500">Mejor Tiempo</p>
+                                <p class="font-semibold">${category.bestTime}s</p>
+                            </div>
+                        </div>
+                        
+                        <div id="playButton-${category.id}" class="mt-4 pt-4 border-t hidden">
+                            <button class="w-full btn-gradient text-white px-4 py-2 rounded-lg">
+                                <i data-lucide="play" class="w-4 h-4 inline mr-2"></i>
+                                Jugar Ahora
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+        
+        function selectCategory(categoryId) {
+            if (selectedCategory === categoryId) {
+                selectedCategory = null;
+                document.getElementById(`playButton-${categoryId}`).classList.add('hidden');
+            } else {
+                // Hide previous button
+                if (selectedCategory) {
+                    document.getElementById(`playButton-${selectedCategory}`).classList.add('hidden');
+                }
+                selectedCategory = categoryId;
+                document.getElementById(`playButton-${categoryId}`).classList.remove('hidden');
+            }
+        }
+        
+        function filterCategories(searchTerm) {
+            const filtered = categories.filter(cat => 
+                cat.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            const grid = document.getElementById('categoriesGrid');
+            grid.innerHTML = filtered.map(category => `
+                <div class="border-2 border-gray-200 hover:border-purple-300 transition-all duration-300 cursor-pointer card-hover bg-white rounded-lg p-6" onclick="selectCategory('${category.id}')">
+                    <!-- Same content as renderCategories -->
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+        
+        // Achievements
+        function renderAchievements() {
+            const grid = document.getElementById('achievementsGrid');
+            grid.innerHTML = achievements.map(achievement => `
+                <div class="border-2 ${achievement.unlocked ? 'border-yellow-400 bg-yellow-50' : 'border-gray-200 bg-gray-50'} transition-all duration-300 bg-white rounded-lg p-4 text-center">
+                    <div class="text-4xl mb-2 ${achievement.unlocked ? '' : 'grayscale opacity-50'}">
+                        ${achievement.icon}
+                    </div>
+                    <h3 class="font-semibold text-gray-800 text-sm">${achievement.name}</h3>
+                    <p class="text-xs text-gray-600 mt-1">${achievement.description}</p>
+                    ${achievement.unlocked ? 
+                        '<span class="inline-block mt-2 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs"><i data-lucide="trophy" class="w-3 h-3 inline mr-1"></i>Desbloqueado</span>' : 
+                        `<div class="mt-2">
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-500 h-2 rounded-full" style="width: ${(achievement.progress / achievement.maxProgress) * 100}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">${achievement.progress}/${achievement.maxProgress}</p>
+                        </div>`
+                    }
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+        
+        // Friends
+        function renderFriends() {
+            const grid = document.getElementById('friendsGrid');
+            grid.innerHTML = friends.map(friend => `
+                <div class="border-2 border-gray-200 hover:border-purple-300 transition-all duration-300 bg-white rounded-lg p-4">
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold">
+                                ${friend.name.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <div class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
+                                friend.status === 'online' ? 'bg-green-500' :
+                                friend.status === 'playing' ? 'bg-yellow-500' : 'bg-gray-400'
+                            }"></div>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-800 text-sm">${friend.name}</p>
+                            <p class="text-xs text-gray-500">Nivel ${friend.level} • ${friend.progress}%</p>
+                            <p class="text-xs text-gray-400">${friend.lastSeen}</p>
+                        </div>
+                        <button class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            <i data-lucide="external-link" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+        
+        // Contact form
+        function sendMessage(event) {
+            event.preventDefault();
+            showModal('Tu mensaje ha sido enviado correctamente');
+            event.target.reset();
+        }
+        
+        // Modal
+        function showModal(message) {
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+        
+        // Close notifications when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('notificationDropdown');
+            const button = event.target.closest('button');
+            
+            if (!dropdown.contains(event.target) && (!button || !button.onclick || !button.onclick.toString().includes('toggleNotifications'))) {
+                dropdown.classList.remove('show');
+            }
+        });
+        
+        // Navigate to home page
+        function goToHome() {
+            // Determine the correct path based on the current location
+            const currentPath = window.location.pathname;
+            
+            // If we're in the interactive-dashboard.html file
+            if (currentPath.includes('interactive-dashboard') || currentPath.includes('interactive_dashboard')) {
+                // Navigate to root (works for both Next.js and static servers)
+                window.location.href = '/';
+            } else {
+                // Fallback: try to go to root or index
+                const basePath = window.location.origin;
+                window.location.href = basePath + '/';
+            }
+        }
+        
+        // Profile functions
+        function changeAvatar() {
+            const avatars = ['JM', '⚡', '🎯', '🏆', '🌟', '🎮'];
+            const current = document.getElementById('avatarDisplay').textContent;
+            const currentIndex = avatars.indexOf(current);
+            const nextIndex = (currentIndex + 1) % avatars.length;
+            document.getElementById('avatarDisplay').textContent = avatars[nextIndex];
+            showModal('Avatar actualizado correctamente');
+        }
+        
+        // Enhanced edit mode
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            
+            const inputs = ['emailInput', 'phoneInput', 'nameInput', 'bioInput', 'birthInput', 'favoriteCategory', 'preferredDifficulty'];
+            const saveButtons = document.getElementById('saveButtons');
+            const editIcon = document.getElementById('editIcon');
+            const cancelIcon = document.getElementById('cancelIcon');
+            
+            inputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.disabled = !isEditMode;
+                    if (isEditMode) {
+                        input.classList.remove('bg-gray-50');
+                        input.classList.add('border-purple-300', 'focus:ring-2', 'focus:ring-purple-500');
+                    } else {
+                        input.classList.add('bg-gray-50');
+                        input.classList.remove('border-purple-300', 'focus:ring-2', 'focus:ring-purple-500');
+                    }
+                }
+            });
+            
+            if (isEditMode) {
+                saveButtons.classList.remove('hidden');
+                editIcon.classList.add('hidden');
+                cancelIcon.classList.remove('hidden');
+            } else {
+                saveButtons.classList.add('hidden');
+                editIcon.classList.remove('hidden');
+                cancelIcon.classList.add('hidden');
+            }
+        }
+        
+        // Friends functions
+        let friendsView = 'all';
+        function switchFriendsView(view) {
+            friendsView = view;
+            const pendingView = document.getElementById('pendingRequestsView');
+            const allView = document.getElementById('allFriendsView');
+            
+            if (view === 'pending') {
+                pendingView.classList.remove('hidden');
+                allView.classList.add('hidden');
+            } else {
+                pendingView.classList.add('hidden');
+                allView.classList.remove('hidden');
+            }
+            renderFriends();
+        }
+        
+        function searchFriends(searchTerm) {
+            const filtered = friends.filter(friend => 
+                friend.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            renderFriends(filtered);
+        }
+        
+        function filterFriends(filter) {
+            let filtered = friends;
+            if (filter === 'online') {
+                filtered = friends.filter(f => f.status === 'online');
+            } else if (filter === 'playing') {
+                filtered = friends.filter(f => f.status === 'playing');
+            } else if (filter === 'offline') {
+                filtered = friends.filter(f => f.status === 'offline');
+            }
+            renderFriends(filtered);
+        }
+        
+        function acceptFriendRequest(friendId) {
+            const index = friends.findIndex(f => f.id === friendId);
+            if (index === -1) {
+                friends.push({
+                    id: friendId,
+                    name: friendId === 'friend_004' ? 'María Rodríguez' : 'David López',
+                    status: 'offline',
+                    lastSeen: 'Ahora',
+                    level: friendId === 'friend_004' ? 15 : 20,
+                    progress: friendId === 'friend_004' ? 67 : 78
+                });
+            }
+            updatePendingCount();
+            switchFriendsView('all');
+            showModal('Solicitud de amistad aceptada');
+            renderFriends();
+        }
+        
+        function rejectFriendRequest(friendId) {
+            updatePendingCount();
+            showModal('Solicitud de amistad rechazada');
+        }
+        
+        function updatePendingCount() {
+            const count = 2; // This would come from server
+            const countElement = document.getElementById('pendingCount');
+            if (countElement) {
+                if (count > 0) {
+                    countElement.textContent = count;
+                    countElement.classList.remove('hidden');
+                } else {
+                    countElement.classList.add('hidden');
+                }
+            }
+        }
+        
+        // Enhanced render friends
+        function renderFriends(friendsList = friends) {
+            const grid = document.getElementById('friendsGrid');
+            if (!grid) return;
+            
+            grid.innerHTML = friendsList.map(friend => `
+                <div class="border-2 border-gray-200 hover:border-purple-300 transition-all duration-300 bg-white rounded-lg p-4 card-hover">
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-semibold">
+                                ${friend.name.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <div class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
+                                friend.status === 'online' ? 'bg-green-500' :
+                                friend.status === 'playing' ? 'bg-yellow-500' : 'bg-gray-400'
+                            }"></div>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-800 text-sm">${friend.name}</p>
+                            <p class="text-xs text-gray-500">Nivel ${friend.level} • ${friend.progress}%</p>
+                            <p class="text-xs text-gray-400">${friend.lastSeen}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="viewFriendProfile('${friend.id}')" class="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" title="Ver perfil">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="compareProgress('${friend.id}')" class="px-3 py-2 border border-purple-300 rounded-lg hover:bg-purple-50 transition-colors" title="Comparar progreso">
+                                <i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+        
+        function viewFriendProfile(friendId) {
+            showModal('Función de ver perfil de amigo próximamente');
+        }
+        
+        function compareProgress(friendId) {
+            switchTab('friends');
+            showModal('Función de comparar progreso disponible en la sección de Amigos');
+        }
+        
+        // Settings functions
+        function toggleSetting(button) {
+            button.classList.toggle('active');
+            const isActive = button.classList.contains('active');
+            if (isActive) {
+                button.style.backgroundColor = '#9333ea';
+            } else {
+                button.style.backgroundColor = '';
+            }
+        }
+        
+        function toggleDarkModeSetting(button) {
+            toggleSetting(button);
+            toggleDarkMode();
+        }
+        
+        function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            
+            if (!current || !newPass || !confirm) {
+                showModal('Por favor completa todos los campos');
+                return;
+            }
+            
+            if (newPass !== confirm) {
+                showModal('Las contraseñas no coinciden');
+                return;
+            }
+            
+            if (newPass.length < 6) {
+                showModal('La contraseña debe tener al menos 6 caracteres');
+                return;
+            }
+            
+            showModal('Contraseña actualizada correctamente');
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+        }
+        
+        function showActiveSessions() {
+            showModal('Sesiones activas:\n\n• Dispositivo actual (Este navegador)\n• Móvil Android - Hace 2 horas\n• iPad - Ayer');
+        }
+        
+        function logoutAllDevices() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión en todos los dispositivos?')) {
+                showModal('Sesiones cerradas en todos los dispositivos excepto este');
+            }
+        }
+        
+        function exportData() {
+            showModal('Se está preparando la descarga de tus datos. Recibirás un email cuando esté lista.');
+        }
+        
+        function confirmDeleteAccount() {
+            if (confirm('¿Estás SEGURO de que quieres eliminar tu cuenta? Esta acción no se puede deshacer.')) {
+                if (confirm('Esta acción eliminará PERMANENTEMENTE todos tus datos. ¿Confirmar eliminación?')) {
+                    showModal('Tu solicitud de eliminación ha sido recibida. Se procesará en las próximas 24 horas.');
+                }
+            }
+        }
+        
+        function saveSettings() {
+            showModal('Configuración guardada correctamente');
+        }
+        
+        function resetSettings() {
+            if (confirm('¿Estás seguro de que quieres restablecer todas las configuraciones a sus valores por defecto?')) {
+                location.reload();
+            }
+        }
+        
+        function showFilterModal() {
+            showModal('Filtros disponibles:\n\n• Por dificultad\n• Por progreso\n• Por categoría');
+        }
+    </script>
+</body>
+</html>

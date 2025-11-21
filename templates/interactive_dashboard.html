@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Interactivo - Escape Room Mágico</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        purple: {
+                            50: '#faf5ff',
+                            100: '#f3e8ff',
+                            200: '#e9d5ff',
+                            300: '#d8b4fe',
+                            400: '#c084fc',
+                            500: '#a855f7',
+                            600: '#9333ea',
+                            700: '#7c3aed',
+                            800: '#6b21a8',
+                            900: '#581c87',
+                        },
+                        pink: {
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            200: '#fbcfe8',
+                            300: '#f9a8d4',
+                            400: '#f472b6',
+                            500: '#ec4899',
+                            600: '#db2777',
+                            700: '#be185d',
+                            800: '#9d174d',
+                            900: '#831843',
+                        }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in',
+                        'slide-in': 'slideIn 0.3s ease-out',
+                        'scale-in': 'scaleIn 0.2s ease-out',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        slideIn: {
+                            '0%': { transform: 'translateX(-100%)' },
+                            '100%': { transform: 'translateX(0)' }
+                        },
+                        scaleIn: {
+                            '0%': { transform: 'scale(0.95)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom animations and transitions */
+        .hover-scale {
+            transition: transform 0.3s ease;
+        }
+        
+        .hover-scale:hover {
+            transform: scale(1.05);
+        }
+        
+        .progress-bar {
+            transition: width 0.5s ease;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .notification-dropdown {
+            display: none;
+        }
+        
+        .notification-dropdown.show {
+            display: block;
+        }
+        
+        .toggle-switch {
+            transition: background-color 0.3s ease;
+        }
+        
+        .toggle-switch.active {
+            background-color: #9333ea;
+        }
+        
+        .toggle-knob {
+            transition: transform 0.3s ease;
+        }
+        
+        .toggle-switch.active .toggle-knob {
+            transform: translateX(24px);
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c084fc;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a855f7;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Button effects */
+        .btn-gradient {
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, #9333ea 0%, #db2777 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(168, 85, 247, 0.4);
+        }
+        
+        /* Dark mode styles */
+        .dark {
+            background: linear-gradient(to bottom right, #1a1a2e, #16213e, #0f3460);
+            color: #ffffff;
+        }
+        
+        .dark .bg-white {
+            background-color: #1f2937 !important;
+        }
+        
+        .dark .text-gray-800 {
+            color: #f3f4f6 !important;
+        }
+        
+        .dark .text-gray-600 {
+            color: #d1d5db !important;
+        }
+        
+        .dark .border-gray-200 {
+            border-color: #374151 !important;
+        }
+        
+        .dark .bg-gray-50 {
+            background-color: #374151 !important;
+        }
+        
+        /* Glow effects */
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+        }
+        
+        .glow-pink {
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="w-20 h-20 border-4 border-white border-t-transparent rounded-full spinner mx-auto mb-4"></div>
+            <h2 class="text-white text-2xl font-bold">Escape Room Mágico</h2>
+            <p class="text-purple-100">Cargando dashboard...</p>
+        </div>
+    </div>
+    
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 text-white p-6 shadow-xl">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="relative">
+                        <div id="userAvatar" class="w-16 h-16 rounded-full border-4 border-white/30 bg-purple-700 flex items-center justify-center text-2xl font-bold">
+                            JM
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
+                            <div class="w-2 h-2 bg-white rounded-full"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h1 id="userName" class="text-3xl font-bold">Jugador Mágico</h1>
+                        <p id="userLevel" class="text-purple-100">Nivel 28 • Experto</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <p class="text-sm text-purple-100">Experiencia</p>
+                        <p id="userXP" class="text-xl font-bold">2847 XP</p>
+                    </div>
+                    
+                    <div class="relative">
+                        <button onclick="toggleNotifications()" class="relative text-white hover:bg-white/20 p-2 rounded-lg transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            <span id="notificationCount" class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center">0</span>
+                        </button>
+                        
+                        <div id="notificationDropdown" class="notification-dropdown absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
+                            <div class="p-4 border-b">
+                                <h3 class="font-semibold text-gray-800">Notificaciones</h3>
+                            </div>
+                            <div id="notificationsList">
+                                <!-- Notifications will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="toggleDarkMode()" class="text-white hover:bg-white/20 p-2 rounded-lg transition-colors">
+                        <i data-lucide="moon" class="w-5 h-5" id="darkModeIcon"></i>
+                    </button>
+                    
+                    <button onclick="showSettings()" class="text-white border-white/30 hover:bg-white/20 px-4 py-2 rounded-lg transition-colors">
+                        <i data-lucide="settings" class="w-4 h-4 inline mr-2"></i>
+                        Configuración
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto p-6">
+        <!-- Navigation Tabs -->
+        <div class="bg-white/90 backdrop-blur-sm border border-purple-200 rounded-lg p-1 mb-6">
+            <div class="grid grid-cols-6 gap-1">
+                <button onclick="switchTab('overview')" class="tab-btn active px-4 py-3 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-all" data-tab="overview">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                    Resumen
+                </button>
+                <button onclick="switchTab('profile')" class="tab-btn px-4 py-3 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-all" data-tab="profile">
+                    <i data-lucide="user" class="w-4 h-4"></i>
+                    Perfil
+                </button>
+                <button onclick="switchTab('progress')" class="tab-btn px-4 py-3 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-all" data-tab="progress">
+                    <i data-lucide="trophy" class="w-4 h-4"></i>
+                    Progreso
+                </button>
+                <button onclick="switchTab('achievements')" class="tab-btn px-4 py-3 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-all" data-tab="achievements">
+                    <i data-lucide="award" class="w-4 h-4"></i>
+                    Logros
+                </button>
+                <button onclick="switchTab('friends')" class="tab-btn px-4 py-3 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-all" data-tab="friends">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                    Amigos
+                </button>
+                <button onclick="switchTab('contact')" class="tab-btn px-4 py-3 rounded-md flex items-center justify-center gap-2 text-sm font-medium transition-all" data-tab="contact">
+                    <i data-lucide="message-square" class="w-4 h-4"></i>
+                    Contacto
+                </button>
+            </div>
+        </div>
+        
+        <!-- Tab Content -->
+        <div class="space-y-6">
+            
+            <!-- Overview Tab -->
+            <div id="overview-tab" class="tab-content active animate-fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="border-2 border-purple-400 hover:shadow-lg transition-all duration-300 transform hover:scale-105 bg-white rounded-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Tiempo Total</p>
+                                <p id="totalTime" class="text-2xl font-bold text-gray-800">13h 32m</p>
+                                <div class="flex items-center mt-1">
+                                    <i data-lucide="trending-up" class="w-4 h-4 text-green-500 mr-1"></i>
+                                    <span class="text-sm text-green-500">+12%</span>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-full border-purple-400 bg-purple-100">
+                                <i data-lucide="clock" class="w-6 h-6 text-purple-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-2 border-green-400 hover:shadow-lg transition-all duration-300 transform hover:scale-105 bg-white rounded-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Puzzles Resueltos</p>
+                                <p id="puzzlesSolved" class="text-2xl font-bold text-gray-800">89</p>
+                                <div class="flex items-center mt-1">
+                                    <i data-lucide="trending-up" class="w-4 h-4 text-green-500 mr-1"></i>
+                                    <span class="text-sm text-green-500">+8%</span>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-full border-green-400 bg-green-100">
+                                <i data-lucide="target" class="w-6 h-6 text-green-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-2 border-yellow-400 hover:shadow-lg transition-all duration-300 transform hover:scale-105 bg-white rounded-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Racha Actual</p>
+                                <p id="currentStreak" class="text-2xl font-bold text-gray-800">5 días</p>
+                                <div class="flex items-center mt-1">
+                                    <i data-lucide="trending-up" class="w-4 h-4 text-green-500 mr-1"></i>
+                                    <span class="text-sm text-green-500">+25%</span>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-full border-yellow-400 bg-yellow-100">
+                                <i data-lucide="zap" class="w-6 h-6 text-yellow-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-2 border-red-400 hover:shadow-lg transition-all duration-300 transform hover:scale-105 bg-white rounded-lg p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Mejor Tiempo</p>
+                                <p id="bestTime" class="text-2xl font-bold text-gray-800">127s</p>
+                                <div class="flex items-center mt-1">
+                                    <i data-lucide="trending-up" class="w-4 h-4 text-red-500 mr-1 transform rotate-180"></i>
+                                    <span class="text-sm text-red-500">-5%</span>
+                                </div>
+                            </div>
+                            <div class="p-3 rounded-full border-red-400 bg-red-100">
+                                <i data-lucide="trophy" class="w-6 h-6 text-red-600"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="border-purple-200 shadow-lg bg-white rounded-lg">
+                        <div class="p-6 border-b">
+                            <h3 class="flex items-center gap-2 font-semibold text-gray-800">
+                                <i data-lucide="activity" class="w-5 h-5 text-purple-600"></i>
+                                Actividad Reciente
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div id="recentActivity">
+                                <!-- Activity will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border-pink-200 shadow-lg bg-white rounded-lg">
+                        <div class="p-6 border-b">
+                            <h3 class="flex items-center gap-2 font-semibold text-gray-800">
+                                <i data-lucide="trending-up" class="w-5 h-5 text-pink-600"></i>
+                                Progreso General
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-4">
+                            <div class="text-center">
+                                <div id="overallProgress" class="text-3xl font-bold text-purple-600">75%</div>
+                                <p class="text-sm text-gray-600">Progreso Total</p>
+                                <div class="w-full bg-gray-200 rounded-full h-3 mt-2">
+                                    <div id="overallProgressBar" class="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full progress-bar" style="width: 75%"></div>
+                                </div>
+                            </div>
+                            
+                            <div id="categoryProgressList">
+                                <!-- Category progress will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Other tabs (Profile, Progress, Achievements, Friends, Contact) -->
+            <!-- Similar structure as before but with API integration -->
+            
+        </div>
+    </div>
+    
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 animate-scale-in">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="check" class="w-8 h-8 text-green-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">¡Éxito!</h3>
+                <p class="text-gray-600 mb-4" id="modalMessage">Operación completada correctamente</p>
+                <button onclick="closeModal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let userData = {};
+        let gameStats = {};
+        let categories = [];
+        let achievements = [];
+        let friends = [];
+        let notifications = [];
+        let selectedCategory = null;
+        let isEditMode = false;
+        let darkMode = false;
+        
+        // API Base URL
+        const API_BASE = '';
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+            loadDashboardData();
+        });
+        
+        // Load all dashboard data
+        async function loadDashboardData() {
+            try {
+                const [userRes, statsRes, categoriesRes, achievementsRes, friendsRes, notificationsRes] = await Promise.all([
+                    fetch(`${API_BASE}/api/user/profile`),
+                    fetch(`${API_BASE}/api/user/stats`),
+                    fetch(`${API_BASE}/api/categories`),
+                    fetch(`${API_BASE}/api/achievements`),
+                    fetch(`${API_BASE}/api/friends`),
+                    fetch(`${API_BASE}/api/notifications`)
+                ]);
+                
+                userData = await userRes.json();
+                gameStats = await statsRes.json();
+                categories = await categoriesRes.json();
+                achievements = await achievementsRes.json();
+                friends = await friendsRes.json();
+                notifications = await notificationsRes.json();
+                
+                updateUI();
+                hideLoadingScreen();
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                // Load with mock data if API fails
+                loadMockData();
+            }
+        }
+        
+        // Load mock data if API fails
+        function loadMockData() {
+            userData = {
+                name: "Jugador Mágico",
+                level: "Experto",
+                experience: 2847
+            };
+            
+            gameStats = {
+                totalPlayTime: 48720,
+                puzzlesSolved: 89,
+                currentStreak: 5,
+                bestTime: 127
+            };
+            
+            categories = [
+                { id: 'clasico', name: 'Clásico', icon: '🎭', progress: 100 },
+                { id: 'naturaleza', name: 'Naturaleza', icon: '🌿', progress: 87 },
+                { id: 'espacio', name: 'Espacio', icon: '🚀', progress: 75 }
+            ];
+            
+            notifications = [
+                { title: "Nuevo logro desbloqueado", message: "¡Has desbloqueado 'Demonio de Velocidad'!", read: false },
+                { title: "Amigo en línea", message: "Ana Martínez está jugando ahora", read: false }
+            ];
+            
+            updateUI();
+            hideLoadingScreen();
+        }
+        
+        // Update UI with loaded data
+        function updateUI() {
+            // Update header
+            document.getElementById('userName').textContent = userData.name || 'Jugador Mágico';
+            document.getElementById('userLevel').textContent = `Nivel ${Math.floor((userData.experience || 2847) / 100)} • ${userData.level || 'Experto'}`;
+            document.getElementById('userXP').textContent = `${userData.experience || 2847} XP`;
+            
+            // Update stats
+            document.getElementById('totalTime').textContent = formatTime(gameStats.totalPlayTime || 48720);
+            document.getElementById('puzzlesSolved').textContent = gameStats.puzzlesSolved || 89;
+            document.getElementById('currentStreak').textContent = `${gameStats.currentStreak || 5} días`;
+            document.getElementById('bestTime').textContent = `${gameStats.bestTime || 127}s`;
+            
+            // Update notifications
+            updateNotifications();
+            
+            // Update progress
+            updateProgress();
+            
+            // Update activity
+            updateActivity();
+        }
+        
+        // Hide loading screen
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+            }, 500);
+        }
+        
+        // Format time
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            
+            if (hours > 0) {
+                return `${hours}h ${minutes}m`;
+            } else {
+                return `${minutes}m`;
+            }
+        }
+        
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            const selectedTab = document.getElementById(tabName + '-tab');
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+                selectedTab.classList.add('animate-fade-in');
+            }
+            
+            // Update button styles
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-purple-600', 'text-white');
+                btn.classList.add('text-gray-600', 'hover:text-gray-800');
+            });
+            
+            const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-600', 'hover:text-gray-800');
+                activeBtn.classList.add('bg-purple-600', 'text-white');
+            }
+        }
+        
+        // Notifications
+        function updateNotifications() {
+            const unreadCount = notifications.filter(n => !n.read).length;
+            document.getElementById('notificationCount').textContent = unreadCount;
+            
+            const notificationsList = document.getElementById('notificationsList');
+            notificationsList.innerHTML = notifications.map(notif => `
+                <div class="p-4 border-b hover:bg-gray-50 cursor-pointer ${!notif.read ? 'bg-blue-50' : ''}" onclick="markNotificationRead('${notif.id}')">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-800 text-sm">${notif.title}</p>
+                            <p class="text-gray-600 text-xs mt-1">${notif.message}</p>
+                        </div>
+                        <span class="text-xs text-gray-500 ml-2">${notif.time || 'Ahora'}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notificationDropdown');
+            dropdown.classList.toggle('show');
+        }
+        
+        async function markNotificationRead(notifId) {
+            try {
+                await fetch(`${API_BASE}/api/notifications/${notifId}/read`, {
+                    method: 'POST'
+                });
+                
+                const notif = notifications.find(n => n.id === notifId);
+                if (notif) {
+                    notif.read = true;
+                    updateNotifications();
+                }
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+            }
+        }
+        
+        // Progress
+        function updateProgress() {
+            const overallProgress = categories.reduce((acc, cat) => acc + cat.progress, 0) / categories.length;
+            document.getElementById('overallProgress').textContent = `${Math.round(overallProgress)}%`;
+            document.getElementById('overallProgressBar').style.width = `${overallProgress}%`;
+            
+            const progressList = document.getElementById('categoryProgressList');
+            if (progressList) {
+                progressList.innerHTML = categories.slice(0, 3).map(cat => `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span>${cat.icon}</span>
+                            <span class="text-sm font-medium">${cat.name}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-20 bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-500 h-2 rounded-full" style="width: ${cat.progress}%"></div>
+                            </div>
+                            <span class="text-sm text-gray-600">${cat.progress}%</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Activity
+        function updateActivity() {
+            const activityDiv = document.getElementById('recentActivity');
+            if (activityDiv) {
+                // Mock activity data
+                const activities = [
+                    { category: 'Exploración Espacial', time: 'Hace 2 horas', result: 'Completado', icon: '🚀' },
+                    { category: 'Viaje en el Tiempo', time: 'Ayer', result: 'Abandonado', icon: '⏰' },
+                    { category: 'Desafío Deportivo', time: 'Hace 2 días', result: 'Completado', icon: '🏆' }
+                ];
+                
+                activityDiv.innerHTML = activities.map(activity => `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${activity.icon}</span>
+                            <div>
+                                <p class="font-semibold text-gray-800">${activity.category}</p>
+                                <p class="text-sm text-gray-500">${activity.time}</p>
+                            </div>
+                        </div>
+                        <span class="bg-${activity.result === 'Completado' ? 'green' : 'red'}-500 text-white px-3 py-1 rounded-full text-sm">
+                            ${activity.result}
+                        </span>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // Dark mode
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.classList.toggle('dark');
+            
+            const icon = document.getElementById('darkModeIcon');
+            icon.setAttribute('data-lucide', darkMode ? 'sun' : 'moon');
+            lucide.createIcons();
+        }
+        
+        // Modal
+        function showModal(message) {
+            document.getElementById('modalMessage').textContent = message;
+            document.getElementById('successModal').classList.remove('hidden');
+        }
+        
+        function closeModal() {
+            document.getElementById('successModal').classList.add('hidden');
+        }
+        
+        function showSettings() {
+            showModal('Configuración en desarrollo');
+        }
+        
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('notificationDropdown');
+            const button = event.target.closest('button');
+            
+            if (!dropdown.contains(event.target) && (!button || !button.onclick || !button.onclick.toString().includes('toggleNotifications'))) {
+                dropdown.classList.remove('show');
+            }
+        });
+        
+        // Add some interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to cards
+            const cards = document.querySelectorAll('.card-hover');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.classList.add('glow-purple');
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.classList.remove('glow-purple');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
